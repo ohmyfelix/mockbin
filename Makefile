@@ -1,4 +1,25 @@
 DOCKER_IMAGE=dockette/mockbin
+DOCKER_COMPOSE=docker compose
+SMOKE_URL=http://127.0.0.1:8000/request
+
+.PHONY: build test run docker-build docker-push test-up test-in test-down
+
+build: docker-build
+
+test:
+	set -e; \
+	$(DOCKER_COMPOSE) up -d --build redis mockbin; \
+	trap '$(DOCKER_COMPOSE) down -v' EXIT; \
+	for i in $$(seq 1 30); do \
+		if curl -fsS "$(SMOKE_URL)" >/dev/null; then \
+			exit 0; \
+		fi; \
+		sleep 2; \
+	done; \
+	$(DOCKER_COMPOSE) logs; \
+	exit 1
+
+run: test-up
 
 docker-build:
 	docker build --pull -t ${DOCKER_IMAGE} .
@@ -7,7 +28,10 @@ docker-push:
 	docker push ${DOCKER_IMAGE}
 
 test-up:
-	docker-compose up
+	$(DOCKER_COMPOSE) up
 
 test-in:
-	docker-compose exec mockbin bash
+	$(DOCKER_COMPOSE) exec mockbin sh
+
+test-down:
+	$(DOCKER_COMPOSE) down -v

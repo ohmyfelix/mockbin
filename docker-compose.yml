@@ -1,7 +1,8 @@
 version: "3.7"
 
 services:
-    httpdump:
+    mockbin:
+        build: .
         image: dockette/mockbin
         ports:
             - 8000:8000
