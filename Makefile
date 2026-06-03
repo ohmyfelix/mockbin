@@ -3,11 +3,12 @@ DOCKER_TAG?=latest
 DOCKER_COMPOSE=docker compose
 SMOKE_URL=http://127.0.0.1:8000/request
 
-.PHONY: build test run docker-build docker-push test-up test-in test-down
 
+.PHONY: build
 build:
 	docker build --pull -t ${DOCKER_IMAGE}:${DOCKER_TAG} .
 
+.PHONY: test
 test:
 	set -e; \
 	$(DOCKER_COMPOSE) up -d --build redis mockbin; \
@@ -21,18 +22,24 @@ test:
 	$(DOCKER_COMPOSE) logs; \
 	exit 1
 
+.PHONY: run
 run: test-up
 
+.PHONY: docker-build
 docker-build: build
 
+.PHONY: docker-push
 docker-push:
 	docker push ${DOCKER_IMAGE}:${DOCKER_TAG}
 
+.PHONY: test-up
 test-up:
 	$(DOCKER_COMPOSE) up
 
+.PHONY: test-in
 test-in:
 	$(DOCKER_COMPOSE) exec mockbin sh
 
+.PHONY: test-down
 test-down:
 	$(DOCKER_COMPOSE) down -v
