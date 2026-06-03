@@ -1,10 +1,12 @@
 DOCKER_IMAGE=dockette/mockbin
+DOCKER_TAG?=latest
 DOCKER_COMPOSE=docker compose
 SMOKE_URL=http://127.0.0.1:8000/request
 
 .PHONY: build test run docker-build docker-push test-up test-in test-down
 
-build: docker-build
+build:
+	docker build --pull -t ${DOCKER_IMAGE}:${DOCKER_TAG} .
 
 test:
 	set -e; \
@@ -21,11 +23,10 @@ test:
 
 run: test-up
 
-docker-build:
-	docker build --pull -t ${DOCKER_IMAGE} .
+docker-build: build
 
 docker-push:
-	docker push ${DOCKER_IMAGE}
+	docker push ${DOCKER_IMAGE}:${DOCKER_TAG}
 
 test-up:
 	$(DOCKER_COMPOSE) up
